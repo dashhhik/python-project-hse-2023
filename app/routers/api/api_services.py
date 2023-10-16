@@ -22,3 +22,6 @@ async def get_weather_api(coords: CoordsOfCity) -> WeatherData:
             json = await resp.json()
             weather_data = WeatherData(**json)
             return weather_data
+
+def what_to_wear():
+    pass
