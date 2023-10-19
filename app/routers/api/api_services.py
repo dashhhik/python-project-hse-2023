@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 import aiohttp
 import requests
@@ -26,19 +27,63 @@ async def get_weather_api(coords: CoordsOfCity) -> WeatherData:
             json = await resp.json()
 
             whole_forecast = WeatherData(**json)
+
+            print(get_recommendation_json(whole_forecast))
             return whole_forecast
 
 
-#
-# asyncio.run(get_zip_code_city("moscow"))
+def what_to_wear(weather_data: WeatherData):
+    data_list = weather_data.list
+    avg_feels_like = sum([entry.main.feels_like for entry in data_list]) / len(data_list)
+    weather_conditions = [entry.weather[0].description for entry in data_list]
+    wind_speeds = [entry.wind.speed for entry in data_list]
+    humidity_levels = [entry.main.humidity for entry in data_list]
+    cloudiness = [entry.clouds.all for entry in data_list]
 
-import requests
+    if avg_feels_like <= 0:
+        recommendation = "Теплая шапка, перчатки, шарф, теплый пуховик или куртка, теплые ботинки."
+    elif avg_feels_like <= 10:
+        recommendation = "Легкая шапка, теплый свитер, демисезонная куртка, обувь на толстой подошве."
+    elif avg_feels_like <= 20:
+        recommendation = "Свитер или легкая кофта, джинсы или брюки, кроссовки."
+    else:
+        recommendation = "Футболка, шорты, легкая обувь."
 
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/2.537.36',
-}
-url = "http://api.openweathermap.org/geo/1.0/direct?q=moscow&limit=1&appid=ff93ecd9453d372012f26751c5ddfa78"
+    if "дождь" in weather_conditions:
+        recommendation += " Не забудьте зонт или дождевик."
+    if "пасмурно" in weather_conditions and max(cloudiness) > 70:
+        recommendation += " Возможно, понадобится свитер или куртка."
+    if max(wind_speeds) > 5:
+        recommendation += " Наденьте ветрозащитную одежду."
+    if max(humidity_levels) > 80:
+        recommendation += " Одевайтесь так, чтобы одежда не промокла."
+
+    return recommendation
 
 
-def what_to_wear():
-    pass
+def get_recommendation_json(weather_data: WeatherData):
+    recommendation = what_to_wear(weather_data)
+
+    avg_temp = round(sum([entry.main.temp for entry in weather_data.list]) / len(weather_data.list))
+    avg_feels_like = round(sum([entry.main.feels_like for entry in weather_data.list]) / len(weather_data.list))
+    avg_humidity = round(sum([entry.main.humidity for entry in weather_data.list]) / len(weather_data.list))
+    avg_wind_speed = round(sum([entry.wind.speed for entry in weather_data.list]) / len(weather_data.list))
+
+    weather_conditions = [entry.weather[0].description for entry in weather_data.list]
+    most_common_weather = max(set(weather_conditions), key=weather_conditions.count)
+
+    result = {
+        "city": weather_data.city.name,
+        "country": weather_data.city.country,
+        "average_temperature": avg_temp,
+        "average_feels_like": avg_feels_like,
+        "average_humidity": avg_humidity,
+        "average_wind_speed": avg_wind_speed,
+        "most_common_weather": most_common_weather,
+        "recommendation": recommendation
+
+    }
+
+    json_result = json.dumps(result, ensure_ascii=False)
+
+    return json_result
