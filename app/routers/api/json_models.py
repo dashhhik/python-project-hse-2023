@@ -71,3 +71,4 @@ class WeatherData(BaseModel):
     cnt: int
     list: List[ListData]
     city: City
+
