@@ -1,10 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <link rel="stylesheet" href="/static/main.css">
 </head>
 <body>
 
+<div class="form-container">
+    <h1>Погодные условия</h1>
+
+    <form action="#" method="GET" onsubmit="return submitWeatherForm(event);">
+        <label for="cityName1">Enter the city:</label>
+        <input type="text" id="cityName1" name="cityName1" required>
+        <button type="submit">Get weather</button>
+    </form>
+
+    <hr>
+
+
+    <form action="#" method="GET" onsubmit="return submitClothesForm(event);">
+        <label for="cityName2">Enter the city:</label>
+        <input type="text" id="cityName2" name="cityName2" required>
+        <button type="submit">Clothing advice</button>
+    </form>
+</div>
+
+<script>
+    function submitWeatherForm(event) {
+        event.preventDefault();
+        const cityName = document.getElementById('cityName1').value;
+        const url = `/weather/current/${cityName}/days/`;
+        window.location.href = url;
+    }
+
+    function submitClothesForm(event) {
+        event.preventDefault();
+        const cityName = document.getElementById('cityName2').value;
+        const url = `/weather/clothes/current/${cityName}/days/`;
+        window.location.href = url;
+    }
+</script>
 </body>
 </html>

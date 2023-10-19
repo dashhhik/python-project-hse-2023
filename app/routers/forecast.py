@@ -34,3 +34,7 @@ async def get_weather(city):
     cloth = get_recommendation_json(weather_data)
 
     return cloth
+
+@router.get("/")
+async def main(request: Request):
+    return templates.TemplateResponse("main.html", {"request": request})

@@ -22,13 +22,13 @@ async def get_zip_code_city(city) -> CoordsOfCity:
 async def get_weather_api(coords: CoordsOfCity) -> WeatherData:
     async with aiohttp.ClientSession() as session:
         api_url = (f'http://api.openweathermap.org/data/2.5/forecast?lat={coords.lat}&lon={coords.lon}'
-                   f'&appid={api_key}&units=metric&cnt=4&lang=ru')
+                   f'&appid={api_key}&units=metric&cnt=4&lang=en')
         async with session.get(api_url) as resp:
             json = await resp.json()
+            print(json)
 
             whole_forecast = WeatherData(**json)
 
-            print(get_recommendation_json(whole_forecast))
             return whole_forecast
 
 
@@ -41,22 +41,22 @@ def what_to_wear(weather_data: WeatherData):
     cloudiness = [entry.clouds.all for entry in data_list]
 
     if avg_feels_like <= 0:
-        recommendation = "Теплая шапка, перчатки, шарф, теплый пуховик или куртка, теплые ботинки."
+        recommendation = "Warm hat, gloves, scarf, warm down jacket or jacket, warm shoes."
     elif avg_feels_like <= 10:
-        recommendation = "Легкая шапка, теплый свитер, демисезонная куртка, обувь на толстой подошве."
+        recommendation = "Light hat, warm sweater, demyson jacket, thick sole shoes."
     elif avg_feels_like <= 20:
-        recommendation = "Свитер или легкая кофта, джинсы или брюки, кроссовки."
+        recommendation = "Sweater or light sweater, jeans or pants, sneakers."
     else:
-        recommendation = "Футболка, шорты, легкая обувь."
+        recommendation = "T-shirt, shorts, light shoes."
 
-    if "дождь" in weather_conditions:
-        recommendation += " Не забудьте зонт или дождевик."
-    if "пасмурно" in weather_conditions and max(cloudiness) > 70:
-        recommendation += " Возможно, понадобится свитер или куртка."
+    if "rain" in weather_conditions:
+        recommendation += " Don’t forget an umbrella or raincoat."
+    if "cloudy" in weather_conditions and max(cloudiness) > 70:
+        recommendation += " Might need a sweater or a jacket."
     if max(wind_speeds) > 5:
-        recommendation += " Наденьте ветрозащитную одежду."
+        recommendation += " Put on some windproof clothes."
     if max(humidity_levels) > 80:
-        recommendation += " Одевайтесь так, чтобы одежда не промокла."
+        recommendation += " Don’t get your clothes wet."
 
     return recommendation
 
